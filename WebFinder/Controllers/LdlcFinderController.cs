@@ -22,18 +22,27 @@ public class LdlcFinderController : ControllerBase
         List<Product> products = new List<Product>();
         foreach (string element in htmlElements)
         {
-            int pFrom = element.IndexOf("<h3 class =\"title-3\">") + "<h3 class =\"title-3\">".Length;
-            int pTo = element.LastIndexOf("</a></h3>");
-
-            string result = element.Substring(pFrom, pTo - pFrom);
-            result = RemoveBefore(result, ".html\">");
             products.Add(new Product
             {
-                Name = result
+                Name = GetProductName(element)
             });
         }
 
         return products;
+    }
+
+    private string GetProductName(string element)
+    {
+        string result = GetStringBetween(element, "<h3 class =\"title-3\">", "</a></h3>");
+
+        return RemoveBefore(result, ".html\">");
+    }
+
+    private string GetStringBetween(string element, string start, string end)
+    {
+        int startPosition = element.IndexOf(start) + start.Length;
+        int endPosition = element.LastIndexOf(end);
+        return element.Substring(startPosition, endPosition - startPosition);
     }
 
     private string[] GetSplittedElements(string htmlCode, string splitString)
