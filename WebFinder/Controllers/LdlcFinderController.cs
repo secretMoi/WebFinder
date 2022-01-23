@@ -20,7 +20,7 @@ public class LdlcFinderController : ControllerBase
     public IActionResult Get(string name)
     {
         try
-        {        
+        {       
             string htmlCode = GetSourceCode(searchUrl + name);
 
             htmlCode = RemoveBefore(htmlCode, "class=\"pdt-item\"");
@@ -29,7 +29,7 @@ public class LdlcFinderController : ControllerBase
 
             string[] htmlElements = GetSplittedElements(htmlCode, "class=\"pdt-item\"");
 
-            var products = GetProducts(htmlElements).Where(product => product.IsInStock == true);
+            var products = GetProducts(htmlElements).Where(product => product.IsInStock == true); // affiche si uniquement en stock
 
             return Ok(products);
         }
@@ -75,12 +75,12 @@ public class LdlcFinderController : ControllerBase
         }
         
         stringPrice = RemoveAfter(stringPrice, "</sup></div>");
-        stringPrice = stringPrice.Replace("€<sup>", ",");
-        stringPrice = stringPrice.Replace("&nbsp;", "");
+        stringPrice = stringPrice.Replace("€<sup>", ","); // permet de retirer le symbol "€" et le remplacer par une virgule
+        stringPrice = stringPrice.Replace("&nbsp;", ""); // retire l'espace entre les centaines et les milliers
 
         try
         {
-            double price = double.Parse(stringPrice);
+            double price = double.Parse(stringPrice); // transforme la chaine de caractère en nombre à virgule
             return price;
         }
         catch(Exception ex)
@@ -97,7 +97,7 @@ public class LdlcFinderController : ControllerBase
 
     private string GetProductName(string element)
     {
-        string result = GetStringBetween(element, "<h3 class =\"title-3\">", "</a></h3>");
+        string result = GetStringBetween(element, "<h3 class =\"title-3\">", "</a></h3>"); // retire les caractères en trop pour le lien de l'image et le nom du produit
 
         return RemoveBefore(result, ".html\">");
     }
