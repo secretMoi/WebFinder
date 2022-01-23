@@ -8,27 +8,91 @@ namespace WebFinder.Controllers;
 [Route("[controller]")]
 public class LdlcFinderController : ControllerBase
 {
-    [HttpGet(Name = "GetLdlcSourceCode")]
-    public List<Product> Get()
+    private readonly ILogger<LdlcFinderController> _logger;
+    private const string searchUrl = "https://www.ldlc.com/fr-be/recherche/";
+
+    public LdlcFinderController(ILogger<LdlcFinderController> logger)
     {
-        string htmlCode = GetSourceCode("https://www.ldlc.com/fr-be/recherche/rtx%203060/");
+        _logger = logger;
+    }
 
-        htmlCode = RemoveBefore(htmlCode, "class=\"pdt-item\"");
+    [HttpGet(Name = "GetLdlcSourceCode")]
+    public IActionResult Get(string name)
+    {
+        try
+        {        
+            string htmlCode = GetSourceCode(searchUrl + name);
 
-        htmlCode = RemoveAfter(htmlCode, "pagination");
+            htmlCode = RemoveBefore(htmlCode, "class=\"pdt-item\"");
 
-        string[] htmlElements = GetSplittedElements(htmlCode, "class=\"pdt-item\"");
+            htmlCode = RemoveAfter(htmlCode, "pagination");
 
+            string[] htmlElements = GetSplittedElements(htmlCode, "class=\"pdt-item\"");
+
+            var products = GetProducts(htmlElements).Where(product => product.IsInStock == true);
+
+            return Ok(products);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            return BadRequest(ex.Message);
+        }
+    }
+
+    private List<Product> GetProducts(string[] htmlElements)
+    {
         List<Product> products = new List<Product>();
         foreach (string element in htmlElements)
         {
             products.Add(new Product
             {
-                Name = GetProductName(element)
+                ImageUrl = GetImageUrl(element),
+                Name = GetProductName(element),
+                Price = GetProductPrice(element),
+                IsInStock = IsProductInStock(element)
             });
         }
 
         return products;
+    }
+
+    private bool IsProductInStock(string element)
+    {
+        return element.Contains("<em>stock</em>");
+    }
+
+    private double GetProductPrice(string element)
+    {
+        string stringPrice;
+        if (element.Contains("<div class=\"new-price\">")) // si il y a un prix promo
+        {
+            stringPrice = RemoveBefore(element, "<div class=\"new-price\">");
+        }
+        else // sinon il y a juste un prix normal
+        {
+            stringPrice = RemoveBefore(element, "<div class=\"price\"><div class=\"price\">");
+        }
+        
+        stringPrice = RemoveAfter(stringPrice, "</sup></div>");
+        stringPrice = stringPrice.Replace("€<sup>", ",");
+        stringPrice = stringPrice.Replace("&nbsp;", "");
+
+        try
+        {
+            double price = double.Parse(stringPrice);
+            return price;
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            return 0.0;
+        }
+    }
+
+    private string GetImageUrl(string element)
+    {
+        return GetStringBetween(element, "<img src=\"", "\" loading=\"lazy\"");
     }
 
     private string GetProductName(string element)
