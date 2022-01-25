@@ -20,10 +20,8 @@ namespace WebFinder.Services
             {
                 try
                 {
-                    foreach(var product in _ldlcService.GetProducts("rtx 3090"))
-                    {
+                    foreach(var product in await _ldlcService.GetProducts("rtx 3090"))
                         _logger.LogInformation($"[{DateTime.Now}] {product}");
-                    }
                 }
                 catch (Exception ex)
                 {

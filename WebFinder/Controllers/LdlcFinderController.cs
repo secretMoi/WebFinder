@@ -17,11 +17,11 @@ public class LdlcFinderController : ControllerBase
     }
 
     [HttpGet(Name = "GetLdlcSourceCode")]
-    public IActionResult Get(string name)
+    public async Task<IActionResult> Get(string name)
     {
         try
         {
-            var products = _ldlcService.GetProducts(name);
+            var products = await _ldlcService.GetProducts(name);
 
             return Ok(products);
         }

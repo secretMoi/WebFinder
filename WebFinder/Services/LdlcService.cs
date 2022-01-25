@@ -12,9 +12,9 @@ public class LdlcService
         _logger = logger;
     }
 
-    public List<Product> GetProducts(string productToSearch)
+    public async Task<List<Product>> GetProducts(string productToSearch)
     {
-        string htmlCode = GetSourceCode(searchUrl + productToSearch);
+        string htmlCode = await GetSourceCode(searchUrl + productToSearch);
 
         htmlCode = RemoveBefore(htmlCode, "class=\"pdt-item\"");
 
@@ -101,15 +101,10 @@ public class LdlcService
         return htmlCode.Split(new[] { splitString }, StringSplitOptions.RemoveEmptyEntries);
     }
 
-    private string GetSourceCode(string url)
+    private async Task<string> GetSourceCode(string url)
     {
-        string htmlCode;
-        using (WebClient client = new())
-        {
-            htmlCode = client.DownloadString(url);
-        }
-
-        return htmlCode;
+        using var client = new HttpClient();
+        return await client.GetStringAsync(url);
     }
 
     private string RemoveBefore(string htmlCode, string stringToFind)
