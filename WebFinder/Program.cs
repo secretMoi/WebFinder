@@ -10,6 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddTransient<LdlcService>();
 builder.Services.AddTransient<IHostedService, HttpRequestService>();
 
 var app = builder.Build();

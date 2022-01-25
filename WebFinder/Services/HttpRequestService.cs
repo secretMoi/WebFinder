@@ -6,40 +6,33 @@ namespace WebFinder.Services
     public class HttpRequestService : BackgroundService
     {
         private readonly ILogger<HttpRequestService> _logger;
-        //private readonly LdlcFinderController _ldlcFinderController;
+        private readonly LdlcService _ldlcService;
 
-        public HttpRequestService(/*LdlcFinderController ldlcFinderController, */ILogger<HttpRequestService> logger)
+        public HttpRequestService(ILogger<HttpRequestService> logger, LdlcService ldlcService)
         {
-            //this._ldlcFinderController = ldlcFinderController;
             _logger = logger;
+            _ldlcService = ldlcService;
         }
 
         protected async override Task ExecuteAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                //_ldlcFinderController.Get("rtx 3090");
                 try
                 {
-                    _logger.LogInformation(GetSourceCode("https://localhost:7092/LdlcFinder?name=3090"));
+                    foreach(var product in _ldlcService.GetProducts("rtx 3090"))
+                    {
+                        _logger.LogInformation($"[{DateTime.Now}] {product}");
+                    }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("Impossible d'automatiser la requête");
+                    _logger.LogError("Impossible d'automatiser la requête : ");
+                    _logger.LogError(ex.Message);
                 }
-                await Task.Delay(3000, cancellationToken);
-            }
-        }
 
-        private string GetSourceCode(string url)
-        {
-            string htmlCode;
-            using (WebClient client = new WebClient())
-            {
-                htmlCode = client.DownloadString(url);
+                await Task.Delay(5000, cancellationToken);
             }
-
-            return htmlCode;
         }
     }
 }
