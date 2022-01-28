@@ -14,23 +14,23 @@ namespace WebFinder.Services
             _ldlcService = ldlcService;
         }
 
-        protected async override Task ExecuteAsync(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                try
-                {
-                    foreach(var product in await _ldlcService.GetProducts("rtx 3090"))
-                        _logger.LogInformation($"[{DateTime.Now}] {product}");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError("Impossible d'automatiser la requête : ");
-                    _logger.LogError(ex.Message);
-                }
+            //while (!cancellationToken.IsCancellationRequested)
+            //{
+            //    try
+            //    {
+            //        foreach(var product in await _ldlcService.GetProducts("rtx 3090"))
+            //            _logger.LogInformation($"[{DateTime.Now}] {product}");
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        _logger.LogError("Impossible d'automatiser la requête : ");
+            //        _logger.LogError(ex.Message);
+            //    }
 
-                await Task.Delay(5000, cancellationToken);
-            }
+            //    await Task.Delay(30000, cancellationToken);
+            //}
         }
     }
 }
