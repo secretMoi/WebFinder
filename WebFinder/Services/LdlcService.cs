@@ -34,8 +34,10 @@ public class LdlcService
         {
             products.Add(new Product
             {
+                Url = GetUrl(element),
                 ImageUrl = GetImageUrl(element),
                 Name = GetProductName(element),
+                Description = GetDescription(element),
                 Price = GetProductPrice(element),
                 IsInStock = IsProductInStock(element)
             });
@@ -47,6 +49,16 @@ public class LdlcService
     private bool IsProductInStock(string element)
     {
         return element.Contains("<em>stock</em>");
+    }
+
+    private string GetUrl(string element)
+    {
+        return "https://www.ldlc.com" + GetStringBetween(element, "<a href=\"", ".html\">") + ".html";
+    }
+
+    private string GetDescription(string element)
+    {
+        return GetStringBetween(element, "<p class=\"desc\">", "</p>");
     }
 
     private double GetProductPrice(string element)
@@ -92,7 +104,7 @@ public class LdlcService
     private string GetStringBetween(string element, string start, string end)
     {
         int startPosition = element.IndexOf(start) + start.Length;
-        int endPosition = element.LastIndexOf(end);
+        int endPosition = element.IndexOf(end);
         return element.Substring(startPosition, endPosition - startPosition);
     }
 
