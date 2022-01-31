@@ -1,15 +1,18 @@
-﻿using System.Net;
+﻿using WebFinder.Database;
+using WebFinder.Database.Tables;
 using WebFinder.Models;
 
 namespace WebFinder.Services;
 public class LdlcService
 {
     private readonly ILogger<LdlcService> _logger;
+    private readonly ProductRepository _productRepository;
     private const string searchUrl = "https://www.ldlc.com/fr-be/recherche/";
 
-    public LdlcService(ILogger<LdlcService> logger)
+    public LdlcService(ILogger<LdlcService> logger, ProductRepository productRepository)
     {
         _logger = logger;
+        _productRepository = productRepository;
     }
 
     public async Task<List<Product>> GetProducts(string productToSearch)
@@ -22,11 +25,34 @@ public class LdlcService
 
         string[] htmlElements = GetSplittedElements(htmlCode, "class=\"pdt-item\"");
 
-        return GetProductsFromHtml(htmlElements)
-            .Where(product => product.IsInStock == true) // affiche si uniquement en stock
-            .ToList();
+        var products = GetProductsFromHtml(htmlElements).ToList();
+        
+        SaveInDatabase(products);
+
+        return products;
     }
 
+    private void SaveInDatabase(List<Product> products)
+    {
+        foreach (var product in products)
+        {
+            var productTable = new ProductTable
+            {
+                Url = product.Url,
+                ImageUrl = product.ImageUrl,
+                Name = product.Name,
+                Description = product.Description,
+                IsInStock = product.IsInStock,
+                Price = product.Price
+            };
+            
+            _productRepository.Create(productTable);
+            _productRepository.SaveChanges();
+        }
+        
+        
+    }
+    
     private List<Product> GetProductsFromHtml(string[] htmlElements)
     {
         List<Product> products = new List<Product>();

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WebFinder.Database.Tables;
-using WebFinder.Models;
 
 namespace WebFinder.Database;
 
@@ -13,9 +12,31 @@ public class ProductRepository
 	{
 		_databaseContext = databaseContext;
 	}
-		
-	public async Task<List<ProductTable>> GetAllAsync()
+	
+	public List<ProductTable> GetAll()
 	{
-		return await _databaseContext.Product.ToListAsync(); // retourne la liste des commandes
+		return _databaseContext.Product.ToList();
 	}
+	
+	public bool SaveChanges()
+	{
+		// permet d'appliquer les modifications à la db
+		return _databaseContext.SaveChanges() >= 0;
+	}
+	
+	public void Create(ProductTable productTable)
+	{
+		if (productTable == null)
+			throw new ArgumentNullException(nameof(productTable));
+
+		
+		if(!GetAll().Select(p => p.Url).ToList().Contains(productTable.Url))
+			_databaseContext.Product.Add(productTable);
+	}
+
+		
+	// public async Task<List<ProductTable>> GetAllAsync()
+	// {
+	// 	return await _databaseContext.Product.ToListAsync(); // retourne la liste des commandes
+	// }
 }
