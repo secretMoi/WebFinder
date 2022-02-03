@@ -8,9 +8,9 @@ namespace WebFinder.Controllers;
 public class LdlcFinderController : ControllerBase
 {
     private readonly ILogger<LdlcFinderController> _logger;
-    private readonly LdlcService _ldlcService;
+    private readonly ILdlcService _ldlcService;
 
-    public LdlcFinderController(ILogger<LdlcFinderController> logger, LdlcService ldlcService)
+    public LdlcFinderController(ILogger<LdlcFinderController> logger, ILdlcService ldlcService)
     {
         _logger = logger;
         _ldlcService = ldlcService;

@@ -3,7 +3,7 @@ using WebFinder.Database.Tables;
 using WebFinder.Models;
 
 namespace WebFinder.Services;
-public class LdlcService
+public class LdlcService : ILdlcService
 {
     private readonly ILogger<LdlcService> _logger;
     private readonly ProductRepository _productRepository;

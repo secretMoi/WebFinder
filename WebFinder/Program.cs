@@ -3,7 +3,7 @@ using WebFinder.Database;
 using WebFinder.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-const string _connectionString = "server=localhost;port=3306;database=WebFinder;user=root;password=root";
+const string _connectionString = "server=192.168.0.119;port=3306;database=WebFinder;user=root;password=root";
 
 
 builder.Services.AddDbContext<DatabaseContext>(opt => opt.UseLazyLoadingProxies()
@@ -17,15 +17,13 @@ builder.Services.AddScoped<ProductRepository>();
 builder.Services.AddCors();
 builder.Services.AddControllers();
 
-builder.Services.AddTransient<LdlcService>();
-// builder.Services.AddTransient<IHostedService, HttpRequestService>();
+builder.Services.AddScoped<ILdlcService, LdlcService>();
+
+builder.Services.AddSingleton<IHostedService, HttpRequestService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-
-
 
 var app = builder.Build();
 
