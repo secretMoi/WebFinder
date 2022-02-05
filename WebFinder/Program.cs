@@ -1,10 +1,13 @@
 using Microsoft.EntityFrameworkCore;
+using WebFinder.Configurations;
 using WebFinder.Database;
 using WebFinder.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 const string _connectionString = "server=192.168.0.119;port=3306;database=WebFinder;user=root;password=root";
 
+builder.Configuration.AddJsonFile("personalConfiguration.json", false, false);
+builder.Services.AddOptions<DiscordConfiguration>().Bind(builder.Configuration.GetSection("Discord"));
 
 builder.Services.AddDbContext<DatabaseContext>(opt => opt.UseLazyLoadingProxies()
     .UseMySql(
@@ -20,6 +23,7 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<ILdlcService, LdlcService>();
 
 builder.Services.AddSingleton<IHostedService, HttpRequestService>();
+builder.Services.AddSingleton<DiscordService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

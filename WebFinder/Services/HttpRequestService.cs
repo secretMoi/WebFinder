@@ -1,7 +1,4 @@
-﻿using System.Net;
-using Discord;
-using Discord.WebSocket;
-using WebFinder.Controllers;
+﻿using System.Text;
 
 namespace WebFinder.Services;
 
@@ -9,12 +6,13 @@ public class HttpRequestService : BackgroundService
 {
     private readonly ILogger<HttpRequestService> _logger;
     private readonly IServiceScopeFactory  _serviceScopeFactory;
-    private DiscordSocketClient  _client;
+    private readonly DiscordService _discordService;
 
-    public HttpRequestService(ILogger<HttpRequestService> logger, IServiceScopeFactory  serviceScopeFactory)
+    public HttpRequestService(ILogger<HttpRequestService> logger, IServiceScopeFactory  serviceScopeFactory, DiscordService discordService)
     {
         _logger = logger;
         _serviceScopeFactory = serviceScopeFactory;
+        _discordService = discordService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -26,21 +24,16 @@ public class HttpRequestService : BackgroundService
         {
             try
             {
-                // foreach(var product in await ldlcService.GetProducts("rtx 3090"))
-                //     _logger.LogInformation($"[{DateTime.Now}] {product}");
-                
-                _client = new DiscordSocketClient();
-                _client.Log += Log;
-                _client.Connected += ClientOnConnected;
-                
-                var token = "";
-                // Some alternative options would be to keep your token in an Environment Variable or a standalone file.
-                // var token = Environment.GetEnvironmentVariable("NameOfYourEnvironmentVariable");
-                // var token = File.ReadAllText("token.txt");
-                // var token = JsonConvert.DeserializeObject<AConfigurationClass>(File.ReadAllText("config.json")).Token;
+                var products = new StringBuilder();
+                foreach (var product in await ldlcService.GetProducts("rtx 3090"))
+                {
+                    var productText = product.ToString();
+                    products.AppendLine(productText);
+                    _logger.LogInformation($"[{DateTime.Now}] {product}");
+                }
 
-                await _client.LoginAsync(TokenType.Bot, token);
-                await _client.StartAsync();
+                await _discordService.ConnectAsync();
+                await _discordService.SendPrivateMessageAsync(products.ToString().Substring(0, 2000));
             }
             catch (Exception ex)
             {
@@ -50,19 +43,5 @@ public class HttpRequestService : BackgroundService
 
             await Task.Delay(30000, cancellationToken);
         }
-    }
-
-    private async Task ClientOnConnected()
-    {
-        var user = await _client.GetUserAsync(0);
-        var channel = await user.CreateDMChannelAsync();
-        await channel.SendMessageAsync("coucou");
-    }
-
-
-    private Task Log(LogMessage msg)
-    {
-        Console.WriteLine(msg.ToString());
-        return Task.CompletedTask;
     }
 }
