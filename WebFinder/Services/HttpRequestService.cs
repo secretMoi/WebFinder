@@ -24,16 +24,20 @@ public class HttpRequestService : BackgroundService
         {
             try
             {
-                var products = new StringBuilder();
-                foreach (var product in await ldlcService.GetProducts("rtx 3090"))
+                var productsToSend = new StringBuilder();
+                var products = await ldlcService.GetProducts("rtx 3060");
+                products = products.Where(product => product.IsInStock)
+                    .OrderBy(product => product.Price)
+                    .ToList();
+                
+                foreach (var product in products)
                 {
-                    var productText = product.ToString();
-                    products.AppendLine(productText);
-                    _logger.LogInformation($"[{DateTime.Now}] {product}");
+                    var productText = product + " : " + product.Url;
+                    productsToSend.AppendLine(productText);
+                    _logger.LogInformation($"[{DateTime.Now}] {productText}");
                 }
 
-                await _discordService.ConnectAsync();
-                await _discordService.SendPrivateMessageAsync(products.ToString().Substring(0, 2000));
+                await SendDiscordMessageAsync(productsToSend.ToString());
             }
             catch (Exception ex)
             {
@@ -43,5 +47,17 @@ public class HttpRequestService : BackgroundService
 
             await Task.Delay(30000, cancellationToken);
         }
+    }
+
+    private async Task SendDiscordMessageAsync(string privateMessage)
+    {
+        await _discordService.ConnectAsync();
+
+        if(privateMessage.Length > 2000)
+        {
+            privateMessage = privateMessage.Substring(0, 2000);
+        }
+        
+        await _discordService.SendPrivateMessageAsync(privateMessage);
     }
 }

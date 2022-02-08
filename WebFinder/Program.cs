@@ -22,7 +22,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddScoped<ILdlcService, LdlcService>();
 
-builder.Services.AddSingleton<IHostedService, HttpRequestService>();
+//builder.Services.AddSingleton<IHostedService, HttpRequestService>();
 builder.Services.AddSingleton<DiscordService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
