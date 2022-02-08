@@ -19,5 +19,6 @@ public class DatabaseContext : DbContext
 		modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 	}
 		
-	public DbSet<ProductTable> Product { get; set; } // map entity framework avec nos modèles
+	public DbSet<ProductTable> Product { get; set; }
+	public DbSet<MonitorTable> Monitor { get; set; }
 }
